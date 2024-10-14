@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  file_server:
+    build:
+      context: .
+      dockerfile: Dockerfile.file_server
+    ports:
+      - "8192:8192"
+    volumes:
+      - ./file_server/images:/app/images
+
+  container_runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.container_runner
+    ports:
+      - "8082:8082"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    devices:
+      - /dev/fuse:/dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      - FILE_SERVER_URL=http://file_server:8192
+    depends_on:
+      - file_server
+
+volumes:
+  fuse_mount:

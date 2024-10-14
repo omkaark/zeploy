@@ -1,0 +1,27 @@
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    fuse \
+    libfuse2 \
+    crun \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN pip3 install --no-cache-dir flask requests fusepy
+
+COPY container_runner/api.py .
+COPY container_runner/fuse_client.py .
+COPY container_runner/start.sh .
+
+EXPOSE 8082
+
+RUN mkdir -p /mnt/fuse \
+    && chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
+
+# docker build -t container_runner -f Dockerfile.container_runner .
+# docker run --privileged --name cr --device /dev/fuse -p 8082:8082 -e FILE_SERVER_URL=http://host.docker.internal:8192 container_runner

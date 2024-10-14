@@ -1,0 +1,13 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY file_server/file_server.py .
+COPY file_server/images /app/images
+
+EXPOSE 8192
+
+CMD ["python", "file_server.py"]
+
+# docker build -t file_server -f Dockerfile.file_server .
+# docker run --name fs -p 8192:8192 file_server
