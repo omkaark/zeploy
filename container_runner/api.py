@@ -1,12 +1,9 @@
 import os
 import json
 import subprocess
-import threading
 import logging
-import time
 from flask import Flask, request, jsonify
 
-# Configure logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[logging.StreamHandler()])
@@ -19,34 +16,20 @@ FILE_SERVER_URL = os.environ.get('FILE_SERVER_URL', 'http://localhost:8192')
 
 def run_container(image_name):
     logger.info(f"Attempting to run container for image: {image_name}")
-    config_path = os.path.join(FUSE_MOUNT_DIR, "config.json")
+    config_path = os.path.join(FUSE_MOUNT_DIR, image_name, "config.json")
     logger.info(f"Config path: {config_path}")
 
-    # Wait for config file to become available (with timeout)
-    timeout = 30
-    start_time = time.time()
-    logger.info(f"Waiting for config file to become available (timeout: {timeout}s)")
-    while not os.path.exists(config_path):
-        if time.time() - start_time > timeout:
-            logger.error(f"Config file not found after waiting: {config_path}")
-            return jsonify({"error": "Config file not found after waiting"}), 404
-        time.sleep(0.5)
-
-    logger.info(f"Config file found: {config_path}")
     try:
         with open(config_path, 'r') as f:
             config = json.load(f)
         logger.debug(f"Loaded config: {json.dumps(config, indent=2)}")
-    except json.JSONDecodeError as e:
-        logger.error(f"Error decoding JSON from config file: {e}")
-        return jsonify({"error": f"Invalid JSON in config file: {str(e)}"}), 500
     except Exception as e:
         logger.error(f"Error reading config file: {e}")
         return jsonify({"error": f"Error reading config file: {str(e)}"}), 500
 
     try:
         logger.info(f"Running crun for image: {image_name}")
-        result = subprocess.run(["crun", "run", "-b", f"/mnt/fuse/", image_name], 
+        result = subprocess.run(["crun", "run", "-b", f"{FUSE_MOUNT_DIR}/{image_name}", image_name], 
                                 capture_output=True, text=True, check=True, timeout=60)
         logger.info("crun command completed successfully")
         logger.debug(f"crun stdout: {result.stdout}")

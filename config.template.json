@@ -11,7 +11,7 @@
     "cwd": "WORKING_DIR"
   },
   "root": {
-    "path": "/mnt/fuse",
+    "path": "/mnt/fuse/IMAGE_PATH",
     "readonly": true
   },
   "mounts": [

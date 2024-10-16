@@ -1,30 +1,24 @@
-import errno
 import os
+import errno
 from fuse import FUSE, FuseOSError, Operations
 import requests
-import json
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class ReadOnlyLocalFS(Operations):
-    def __init__(self, image_name):
-        self.image_name = image_name
+    def __init__(self):
         self.base_url = os.environ.get('FILE_SERVER_URL', 'http://localhost:8192')
 
     def _make_request(self, endpoint, params={}):
         url = f"{self.base_url}/{endpoint}"
-        params['image_name'] = self.image_name
         try:
             response = requests.get(url, params=params)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
             logger.error(f"Error making request to {url}: {str(e)}")
-            raise FuseOSError(errno.EIO)
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON from {url}: {str(e)}")
             raise FuseOSError(errno.EIO)
 
     def access(self, path, mode):
@@ -107,12 +101,13 @@ class ReadOnlyLocalFS(Operations):
     def flush(self, path, fh):
         pass
 
-def mount_fuse(mount_point, image_name, foreground=True):
-    FUSE(ReadOnlyLocalFS(image_name), mount_point, nothreads=True, foreground=foreground, allow_other=True, ro=True)
+
+def mount_fuse(mount_point, foreground=True):
+    FUSE(ReadOnlyLocalFS(), mount_point, nothreads=True, foreground=foreground, allow_other=True, ro=True)
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) != 3:
-        print('usage: %s <mountpoint> <image_name>' % sys.argv[0])
+    if len(sys.argv) != 2:
+        print('usage: %s <mountpoint>' % sys.argv[0])
         exit(1)
-    mount_fuse(sys.argv[1], sys.argv[2])
+    mount_fuse(sys.argv[1])

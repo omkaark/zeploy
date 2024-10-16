@@ -38,6 +38,7 @@ sed -i.bak \
     -e "s|\"ARG_LIST\"|$ARG_LIST_ESCAPED|g" \
     -e "s|\"ENV_LIST\"|$ENV_LIST_ESCAPED|g" \
     -e "s|\"WORKING_DIR\"|\"$WORKDIR_ESCAPED\"|g" \
+    -e "s|IMAGE_PATH|$IMAGE|g" \
     "$DIR/config.json"
 
 echo "Process completed successfully."

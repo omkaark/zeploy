@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 fuse_client.py /mnt/fuse phw &
+python3 fuse_client.py /mnt/fuse &
 
 sleep 5
 
