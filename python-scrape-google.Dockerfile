@@ -11,7 +11,7 @@ import requests\n\
 from bs4 import BeautifulSoup\n\
 \n\
 def search_google(query):\n\
-    url = f"https://www.google.com/search?q={query}"\n\
+    url = f"http://www.google.com/search?q={query}"\n\
     headers = {\n\
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"\n\
     }\n\
